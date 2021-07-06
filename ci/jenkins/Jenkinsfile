@@ -115,7 +115,7 @@ pipeline {
                         rtMavenDeployer (
                             id: "MAVEN_DEPLOYER",
                             serverId: env.ART_ID,
-                            properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
+                            properties: ["app.name=${params.APP_NAME}","app.version=${params.NEW_VERSION}"],
                             releaseRepo: env.MVN_REPO,
                             snapshotRepo: env.MVN_REPO
                         )
