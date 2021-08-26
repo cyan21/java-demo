@@ -20,7 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       JFROG_BUILD_STATUS: PASS
-      JAVA_VERSION: 1.9
+      JAVA_VERSION: 1.11
+      JAVA_DIST: zulu
       MVN_REPO: urs-mvn
       PROMOTE_REPO: urs-mvn-release-local
     steps:
@@ -31,10 +32,11 @@ jobs:
 #        with:
 #          version: 2.1.1
     
-      - name: Setup Java JDK
+      - name: Setup Java JDK ${{ env.MVN_REPO }}
         uses: actions/setup-java@v2.3.0
-#        with:
-#          java-version: 
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DIST }}
         
 
       - name: Ping Artifactory
