@@ -48,10 +48,12 @@ jobs:
       - name: Configure JFrog CLI and Maven client
         run: | 
           jfrog rt mvnc \
-                  --server-id-deploy=yann-swampup \
                   --server-id-resolve=yann-swampup \
-                  --repo-resolve-releases=${{ env.MVN_REPO }} \
-                  --repo-deploy-releases=${{ env.MVN_REPO }}
+                  --repo-resolve-releases=${{ env.MVN_REPO }}	\
+                  --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
+                  --server-id-deploy=yann-swampup \
+                  --repo-deploy-releases=${{ env.MVN_REPO }} \
+                  --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
       - name: Build webapp
         run: jfrog rt mvn -f src/ clean install
