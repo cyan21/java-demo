@@ -38,14 +38,18 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DIST }}
         
-
+      - name: Setup Maven
+        uses: stCarolas/setup-maven@v4.1
+        with:
+          maven-version: 3.5.4
+    
       - name: Ping Artifactory
         run: |
             jfrog --version
             jfrog config show
             jfrog rt ping
             
-      - name: Configure JFrog CLI and Maven client
+      - name: Configure JFrog CLI with Maven client
         run: | 
           jfrog rt mvnc \
                   --server-id-resolve=yann-swampup \
