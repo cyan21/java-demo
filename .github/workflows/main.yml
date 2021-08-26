@@ -48,6 +48,7 @@ jobs:
             jfrog --version
             jfrog config show
             jfrog rt ping
+            env
             
       - name: Configure JFrog CLI with Maven client
         run: | 
