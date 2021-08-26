@@ -1,0 +1,70 @@
+name: java-webapp-gha
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ gha ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+  APP_VERSION: 2.0.0
+  MVN_REPO: urs-mvn
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build_webapp:
+    runs-on: ubuntu-latest
+    env:
+      JFROG_BUILD_STATUS: PASS
+      JAVA_VERSION: 1.9
+      MVN_REPO: urs-mvn
+      PROMOTE_REPO: urs-mvn-release-local
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1.2.0
+#        with:
+#          version: 2.1.1
+    
+      - name: Setup Java JDK
+        uses: actions/setup-java@v2.3.0
+#        with:
+#          java-version: 
+        
+
+      - name: Ping Artifactory
+        run: |
+            jfrog --version
+            jfrog config show
+            jfrog rt ping
+            
+      - name: Configure JFrog CLI and Maven client
+        run: | 
+          jfrog rt mvnc \
+                  --server-id-resolve=yann-swampup \
+                  --server-id-deploy=yann-swampup \
+                  --repo-resolve-releases=${{ env.MVN_REPO }} \
+                  --repo-deploy-releases=${{ env.MVN_REPO }}
+
+      - name: Build webapp
+        run: jfrog rt mvn -f src/ clean install
+        
+      - name: Publish Build Info
+        run: |
+          # Collect environment variables for the build
+          jfrog rt bce 
+          # Collect VCS details from git and add them to the build
+          jfrog rt bag
+          # Publish build info
+          jfrog rt bp
+          
+      - name: Scan Build 
+        run: jfrog rt bs --fail=false
+
+      - name: Promote Build 
+        run: jfrog rt bpr   --status "XRAY_SCAN_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
