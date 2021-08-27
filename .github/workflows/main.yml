@@ -41,7 +41,7 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: ${{ env.JAVA_DIST }}
         
-      - name: Setup Maven
+      - name: Setup Maven ${{ env.MVN_VERSION }}
         uses: stCarolas/setup-maven@v4.1
         with:
           maven-version: ${{ env.MVN_VERSION }}
@@ -64,10 +64,11 @@ jobs:
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
       - name: Build webapp
-        run: jfrog rt mvn -f src/ clean package
-
-      - name: Audit build 
-        run: cd src && jfrog xr am
+#        run: jfrog rt mvn -f src/ clean package
+        run: jfrog rt mvn -f src/ clean package -Dartifactory.publish.artifacts=false
+        
+#      - name: Audit build 
+#        run: cd src && jfrog xr am
 
       - name: Publish Build Info
         run: |
