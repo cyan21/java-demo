@@ -23,7 +23,8 @@ jobs:
       JAVA_VERSION: 16.0.2+7
       JAVA_DIST: zulu
       MVN_VERSION: 3.8.2
-      M2_HOME: /opt/hostedtoolcache/maven/${{ env.MVN_VERSION }}
+      # required by JFrog CLI
+      M2_HOME: /opt/hostedtoolcache/maven/3.8.2
       MVN_REPO: urs-mvn
       PROMOTE_REPO: urs-mvn-release-local
     steps:
