@@ -64,8 +64,8 @@ jobs:
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
       - name: Build webapp
-#        run: jfrog rt mvn -f src/ clean package
-        run: jfrog rt mvn -f src/ clean package -Dartifactory.publish.artifacts=false
+        run: jfrog rt mvn -f src/ clean package
+#        run: jfrog rt mvn -f src/ clean package -Dartifactory.publish.artifacts=false
         
 #      - name: Audit build 
 #        run: cd src && jfrog xr am
