@@ -26,7 +26,7 @@ jobs:
       # required by JFrog CLI
       M2_HOME: /opt/hostedtoolcache/maven/3.8.2/x64
       MVN_REPO: urs-mvn
-      PROMOTE_REPO: urs-mvn-release-local
+      PROMOTE_REPO: urs-mvn-rc-local
     steps:
       - uses: actions/checkout@v2
 
@@ -64,8 +64,11 @@ jobs:
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
       - name: Build webapp
-        run: jfrog rt mvn -f src/ clean install
-        
+        run: jfrog rt mvn -f src/ clean package
+
+      - name: Audit build 
+        run: cd src && jfrog xr am
+
       - name: Publish Build Info
         run: |
           # Collect environment variables for the build
