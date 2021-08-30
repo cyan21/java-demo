@@ -133,7 +133,7 @@ jobs:
       repository: $(DOCKER_REPO)
       command: 'build'
       Dockerfile: 'src/Dockerfile'
-      arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(APP_VERSION)'
+      arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
     displayName: 'Build Docker image'
 
   - task: ArtifactoryDocker@1
@@ -141,7 +141,7 @@ jobs:
       command: 'push'
       artifactoryService: 'yann_swampup'
       targetRepo: $(DOCKER_REPO)
-      imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(APP_VERSION)'
+      imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
       collectBuildInfo: true
       buildName: $(BUILD_INFO_DOCKER)
       buildNumber: '$(Build.BuildNumber)'
