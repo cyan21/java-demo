@@ -74,7 +74,7 @@ jobs:
   - java_webapp
   variables:
     - name: AppVersion
-      value: $[ stageDependencies.java_webapp.outputs['getVersion.appversion'] ]
+      value: $[ dependencies.java_webapp.outputs['getVersion.appversion'] ]
   steps:
   - task: Bash@3
     inputs:
