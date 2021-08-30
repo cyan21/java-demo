@@ -9,7 +9,7 @@ variables:
   BUILD_INFO_DOCKER: docker-$(Build.DefinitionName)-ado
 
 trigger:
-- ado
+- ado2
 
 pool:
   vmImage: ubuntu-latest
