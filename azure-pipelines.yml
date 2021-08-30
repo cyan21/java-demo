@@ -1,6 +1,6 @@
 
 variables:
-  APP_NAME: red
+  APP_NAME: blue
   MVN_REPO: urs-mvn
   MVN_REPO_PROMOTION: urs-mvn-rc-local
   DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
@@ -65,7 +65,8 @@ jobs:
           "files": [
             {
               "pattern": "$(MVN_REPO)/",
-              "build" : "$(BUILD_INFO_WEBAPP)/$(Build.BuildNumber)"
+              "build" : "$(BUILD_INFO_WEBAPP)/$(Build.BuildNumber)",
+              "exclusions" : ["*.pom","*library*"]
             }
           ]
         }
