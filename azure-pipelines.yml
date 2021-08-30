@@ -1,0 +1,148 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+variables:
+  APP_VERSION: 1.0.0
+  MVN_REPO: urs-mvn
+  MVN_REPO_PROMOTION: urs-mvn-rc-local
+  DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
+  DOCKER_REPO: urs-docker
+  BUILD_INFO_WEBAPP: $(Build.DefinitionName)-ado
+  BUILD_INFO_DOCKER: docker-$(Build.DefinitionName)-ado
+
+trigger:
+- ado
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: java_webapp
+  steps:
+  - task: ArtifactoryMaven@2
+    inputs:
+      mavenPomFile: 'src/pom.xml'
+      goals: 'clean package'
+      artifactoryResolverService: 'yann_swampup'
+      targetResolveReleaseRepo: $(MVN_REPO)
+      targetResolveSnapshotRepo: $(MVN_REPO)
+      artifactoryDeployService: 'yann_swampup'
+      targetDeployReleaseRepo: $(MVN_REPO)
+      targetDeploySnapshotRepo: $(MVN_REPO)
+      collectBuildInfo: true
+      buildName: '$(BUILD_INFO_WEBAPP)'
+      buildNumber: '$(Build.BuildNumber)'
+      includeEnvVars: true
+    displayName: 'Build Maven project'
+
+  - task: ArtifactoryPublishBuildInfo@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: $(BUILD_INFO_WEBAPP)
+      buildNumber: '$(Build.BuildNumber)'
+    displayName: 'Publish Build Info'
+
+  - task: ArtifactoryXrayScan@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: $(BUILD_INFO_WEBAPP)
+      buildNumber: '$(Build.BuildNumber)'
+      allowFailBuild: false
+    displayName: 'Scan Build Info'
+
+  - task: ArtifactoryBuildPromotion@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: $(BUILD_INFO_WEBAPP)
+      buildNumber: '$(Build.BuildNumber)'
+      targetRepo: $(MVN_REPO_PROMOTION)
+      status: 'XRAY_SCAN_OK'
+      comment: 'passed Xray Scan'
+      includeDependencies: true
+      copy: false
+      dryRun: false
+    displayName: 'Promote Build Info'
+
+# - job: java_docker
+#   dependsOn:
+#   - java_webapp
+#   steps:
+#   - task: DockerInstaller@0
+#     inputs:
+#       dockerVersion: '17.09.0-ce'
+#     displayName: 'Install Docker'
+#   - task: ArtifactoryGenericDownload@3
+#     inputs:
+#       connection: 'yann_swampup'
+#       specSource: 'taskConfiguration'
+#       fileSpec: |
+#         {
+#           "files": [
+#             {
+#               "pattern": "$(MVN_REPO)/",
+#               "props" : "version=$(APP_VERSION)",
+#               "target": "src/webapp_python.tar.gz"
+#             }
+#           ]
+#         }
+#       collectBuildInfo: true
+#       buildName: $(BUILD_INFO_DOCKER)
+#       buildNumber: '$(Build.BuildNumber)'
+#       failNoOp: true
+#     displayName: 'Download webapp'
+
+#   - script: |
+#       docker images
+#       ls -l src
+#     displayName: 'Check up '
+
+#   - task: Docker@2
+#     inputs:
+#       containerRegistry: 'yann_swampup_docker'
+#       repository: $(DOCKER_REPO)
+#       command: 'build'
+#       Dockerfile: 'src/Dockerfile'
+#       arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(APP_VERSION)'
+#     displayName: 'Build Docker image'
+
+#   - task: ArtifactoryDocker@1
+#     inputs:
+#       command: 'push'
+#       artifactoryService: 'yann_swampup'
+#       targetRepo: $(DOCKER_REPO)
+#       imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(APP_VERSION)'
+#       collectBuildInfo: true
+#       buildName: $(BUILD_INFO_DOCKER)
+#       buildNumber: '$(Build.BuildNumber)'
+#       includeEnvVars: true
+#     displayName: 'Push Docker image'
+
+#   - task: ArtifactoryPublishBuildInfo@1
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       buildName: $(BUILD_INFO_DOCKER)
+#       buildNumber: '$(Build.BuildNumber)'
+#     displayName: 'Publish Docker Build Info'
+
+#   - task: ArtifactoryXrayScan@1
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       buildName: $(BUILD_INFO_DOCKER)
+#       buildNumber: '$(Build.BuildNumber)'
+#       allowFailBuild: false
+#     displayName: 'Scan Docker Build Info'
+
+#   - task: ArtifactoryBuildPromotion@1
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       buildName: $(BUILD_INFO_DOCKER)
+#       buildNumber: '$(Build.BuildNumber)'
+#       targetRepo: 'urs-docker-release-local'
+#       status: 'XRAY_SCAN_OK'
+#       comment: 'passed Xray Scan'
+#       sourceRepo: 'urs-docker-dev-local'
+#       includeDependencies: false
+#       copy: false
+#       dryRun: false
+#     displayName: 'Promote Docker Build Info'  
