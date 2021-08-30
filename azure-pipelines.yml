@@ -65,7 +65,7 @@ jobs:
           "files": [
             {
               "pattern": "$(MVN_REPO)/",
-               "build" : "$(BUILD_INFO_WEBAPP)/$(Build.BuildNumber)",
+              "build" : "$(BUILD_INFO_WEBAPP)/$(Build.BuildNumber)"
             }
           ]
         }
