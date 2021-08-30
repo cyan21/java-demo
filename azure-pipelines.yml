@@ -110,7 +110,7 @@ jobs:
           "files": [
             {
               "pattern": "$(MVN_REPO)/",
-              "props" : "app.name=$(APP_NAME);app.version=$(APP_VERSION)",
+              "props" : "app.name=$(APP_NAME);app.version=$(AppVersion)",
               "target": "src/multi-module-application.jar"
             }
           ]
