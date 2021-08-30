@@ -24,7 +24,7 @@ jobs:
       script: |
         appVersion=`sed -n "s/[[:space:]]*<version>\(.*\)<\/version>/\1/p" src/pom.xml`
         echo $appVersion
-        echo "##vso[task.setvariable variable=appversion;isOutput=true]$appVersion"
+#        echo "##vso[task.setvariable variable=appversion;isOutput=true]$appVersion"
     name: getVersion
 
   # - task: ArtifactoryMaven@2
@@ -76,7 +76,7 @@ jobs:
   - java_webapp
   variables:
     - name: AppVersion
-      value: $[ stageDependencies.java_webapp.outputs['getVersion.appversion'] ]
+      value: $[ stageDependencies.java_webapp.outputs['getVersion.appVersion'] ]
   steps:
   - task: Bash@3
     inputs:
