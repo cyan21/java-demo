@@ -15,13 +15,13 @@ env:
   JF_CLI_VERSION: 2.11.0
   APP_VERSION: 2.0.0
   MVN_REPO: urs-mvn
-  # BUILD_APP: true
-  # BUILD_CONTAINER: true 
+  BUILD_APP: false
+  BUILD_CONTAINER: true 
    
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build_webapp:
-    if: ${{ true }}
+    if: ${{ false }}
     runs-on: ubuntu-latest
     env:
       JFROG_BUILD_STATUS: PASS
@@ -90,7 +90,7 @@ jobs:
         run: jfrog rt bpr --fail-fast=false --status "TEST_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
   
   build_docker:
-    if: ${{ true }}
+    if: ${{ env.BUILD_CONTAINER }}
     needs: build_webapp
     runs-on: ubuntu-latest
     env:
@@ -105,13 +105,13 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v2.0.0  
         with:
-          # version: ${{ env.MVN_REPO }} 
-          version: 2.11.0
+          version: ${{ env.JF_CLI_VERSION }}
 
       - name: Download webapp
         run: |
+          # --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  \
           jfrog rt download \
-            --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  \
+            --build $JFROG_CLI_BUILD_NAME/39  \
             --exclusions "*.pom;*library*" \
             --flat=true \
             --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER \
@@ -130,7 +130,8 @@ jobs:
         with:
           context: src/
           tags: ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }}
-
+          build-args: REGISTRY=${{ env.DOCKER_REG }}
+          
       - name: Scan Docker image
         run: |
           # docker save -o my-image.tar ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }}  
