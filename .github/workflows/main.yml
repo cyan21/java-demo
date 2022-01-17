@@ -21,7 +21,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build_webapp:
-    if: ${{ BUILD_APP }}
+    if: ${{ true }}
     runs-on: ubuntu-latest
     env:
       JFROG_BUILD_STATUS: PASS
@@ -90,7 +90,7 @@ jobs:
       #   run: jfrog rt bpr   --status "XRAY_SCAN_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
   
   build_docker:
-    if: ${{ BUILD_CONTAINER }}
+    if: ${{ true }}
     needs: build_webapp
     runs-on: ubuntu-latest
     env:
