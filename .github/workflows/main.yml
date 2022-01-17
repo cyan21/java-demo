@@ -12,7 +12,7 @@ on:
 env:
   JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
   JF_ID: yann-gcp-dev
-  # JF_CLI_VERSION: 2.11.0
+  JF_CLI_VERSION: 2.11.0
   APP_VERSION: 2.0.0
   MVN_REPO: urs-mvn
   # BUILD_APP: true
@@ -38,7 +38,7 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v2.0.0  
         with:
-          version: 2.11.0
+          version: ${{ env.JF_CLI_VERSION }}
     
       - name: Setup Java JDK ${{ env.JAVA_DIST }} ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v2.3.0
@@ -105,8 +105,9 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v2.0.0  
         with:
+          # version: ${{ env.MVN_REPO }} 
           version: 2.11.0
-          
+
       - name: Download webapp
         run: |
           jfrog rt download \
@@ -149,4 +150,4 @@ jobs:
         run: jfrog bs --fail=false docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
 
       - name: Promote Build 
-        run: jfrog rt bpr  --status "XRAY_SCAN_OK" --source-repo ${{ SRC_REPO }} --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
+        run: jfrog rt bpr  --status "XRAY_SCAN_OK" --source-repo ${{ env.SRC_REPO }} --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
