@@ -19,7 +19,7 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build_webapp:
-    if: ${{ false }}
+    if: ${{ true }}
     runs-on: ubuntu-latest
     env:
       JFROG_BUILD_STATUS: PASS
@@ -29,7 +29,7 @@ jobs:
       # required by JFrog CLI
       # M2_HOME: /opt/hostedtoolcache/maven/3.8.2/x64 # NOT required in JFrog CLI v2.3.0
       MVN_REPO: urs-mvn
-      PROMOTE_REPO: urs-mvn-rc-local
+      PROMOTE_REPO: urs-mvn-release-local
     steps:
       - uses: actions/checkout@v2
 
@@ -89,7 +89,7 @@ jobs:
   
   build_docker:
     if: ${{ true }}
-    # needs: build_webapp
+    needs: build_webapp
     runs-on: ubuntu-latest
     env:
       DOCKER_REG: yann-sbx.dev.gcp.devopsacc.team
@@ -107,13 +107,13 @@ jobs:
 
       - name: Download webapp
         run: |
-          # --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  \
           jfrog rt download \
-            --build $JFROG_CLI_BUILD_NAME/40  \
+            --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  \
             --exclusions "*.pom;*library*" \
             --flat=true \
             --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER \
             --fail-no-op=true \
+            --module=webapp \
             ${{ env.MVN_REPO }} src/multi-module-application.jar
 
       - name: Docker Login
@@ -145,8 +145,11 @@ jobs:
           jfrog rt bag docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
           jfrog rt bp docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
 
-      - name: Scan Build 
-        run: jfrog bs --fail=false docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+      # - name: Scan Build 
+      #   run: jfrog bs --fail=false docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+
+      - name: Deploy and Test 
+        run: echo deploy and run test
 
       - name: Promote Build 
-        run: jfrog rt bpr  --status "XRAY_SCAN_OK" --source-repo ${{ env.SRC_REPO }} --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
+        run: jfrog rt bpr --fail-fast=false --status "XRAY_SCAN_OK" --source-repo ${{ env.SRC_REPO }} --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
