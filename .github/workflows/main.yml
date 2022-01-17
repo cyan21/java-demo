@@ -34,7 +34,7 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v2.0.0  
         with:
-          version: 2.4.1
+          version: 2.11.0
     
       - name: Setup Java JDK ${{ env.JAVA_DIST }} ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v2.3.0
@@ -66,12 +66,14 @@ jobs:
 
       - name: Scan dependencies
         run:  | 
-          curl -fL https://getcli.jfrog.io/v2-jf | | sh 
-          ./jf  --version
-          cd src
-          jfrog c export | ../jf c import 
-          ../jf ping 
-          ../jf xr am 
+          jfrog xr am 
+
+          # curl -fL https://getcli.jfrog.io/v2-jf | | sh 
+          # ./jf  --version
+          # cd src
+          # jfrog c export | ../jf c import 
+          # ../jf ping 
+          # ../jf xr am 
 
       - name: Build webapp and scan generated artifact before upload
         run: jfrog rt mvn -f src/ clean install --no-transfer-progress  --scan=true
