@@ -89,7 +89,7 @@ jobs:
   
   build_docker:
     if: ${{ true }}
-    needs: build_webapp
+    # needs: build_webapp
     runs-on: ubuntu-latest
     env:
       DOCKER_REG: yann-sbx.dev.gcp.devopsacc.team
