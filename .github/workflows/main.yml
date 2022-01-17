@@ -4,13 +4,14 @@ name: java-webapp-gha
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ feature/xray ]
+    branches: [ "improvement/jfrogcli"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
-  JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+  # JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+  JF_ID: yann-gcp-dev
   APP_VERSION: 2.0.0
   MVN_REPO: urs-mvn
    
@@ -30,7 +31,8 @@ jobs:
       PROMOTE_REPO: urs-mvn-rc-local
     steps:
       - uses: actions/checkout@v2
-
+        env:
+          JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v2.0.0  
         with:
@@ -57,23 +59,16 @@ jobs:
       - name: Configure JFrog CLI with Maven client
         run: | 
           jfrog rt mvnc \
-                  --server-id-resolve=yann-swampup \
+                  --server-id-resolve=${{ env.JF_ID }} \
                   --repo-resolve-releases=${{ env.MVN_REPO }}	\
                   --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
-                  --server-id-deploy=yann-swampup \
+                  --server-id-deploy=${{ env.JF_ID }} \
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
       - name: Scan dependencies
         run:  | 
-          jfrog xr am 
-
-          # curl -fL https://getcli.jfrog.io/v2-jf | | sh 
-          # ./jf  --version
-          # cd src
-          # jfrog c export | ../jf c import 
-          # ../jf ping 
-          # ../jf xr am 
+          jfrog audit-mvn 
 
       - name: Build webapp and scan generated artifact before upload
         run: jfrog rt mvn -f src/ clean install --no-transfer-progress  --scan=true
