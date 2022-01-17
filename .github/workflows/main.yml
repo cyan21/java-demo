@@ -66,10 +66,12 @@ jobs:
 
       - name: Scan dependencies
         run:  | 
-          curl -fL https://getcli.jfrog.io/v2 | sh 
-          ./jfrog  --version
+          curl -fL https://getcli.jfrog.io/v2-jf | | sh 
+          ./jf  --version
           cd src
-          ../jfrog xr am 
+          jfrog c export | ../jf c import 
+          ../jf ping 
+          ../jf xr am 
 
       - name: Build webapp and scan generated artifact before upload
         run: jfrog rt mvn -f src/ clean install --no-transfer-progress  --scan=true
