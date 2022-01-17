@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  # JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+  JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
   JF_ID: yann-gcp-dev
   APP_VERSION: 2.0.0
   MVN_REPO: urs-mvn
@@ -31,8 +31,7 @@ jobs:
       PROMOTE_REPO: urs-mvn-rc-local
     steps:
       - uses: actions/checkout@v2
-        env:
-          JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v2.0.0  
         with:
