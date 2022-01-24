@@ -92,6 +92,11 @@ pipeline {
             steps {
                 container('maven') {
                      
+                    sh """
+                        ls -l 
+                        rm -rf example-java/src
+                    """
+                    
                     git branch: params.MY_GIT_BRANCH , url: params.MY_GIT_URL
 
                     dir ("src") {
