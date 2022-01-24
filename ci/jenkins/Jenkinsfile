@@ -102,6 +102,7 @@ pipeline {
                     dir ("src") {
 
                         sh """
+                            git checkout ${params.MY_GIT_BRANCH}
                             ls -l 
                             sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|g" "pom.xml"
                             sed -i "s|<version>2.0.0</version>|<version>${params.NEW_VERSION}</version>|g" "application/pom.xml"
