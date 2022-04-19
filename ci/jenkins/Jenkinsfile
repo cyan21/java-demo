@@ -48,16 +48,17 @@ pipeline {
 
     parameters {
         string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/java-demo', description: 'DO NOT ADD .git at the end')
-        string(name: 'MY_GIT_BRANCH', defaultValue: 'main', description: '')
+        string(name: 'MY_GIT_BRANCH', defaultValue: 'project', description: '')
 
         string(name: 'APP_NAME', defaultValue: 'lion', description: 'will be added as metadata on built artifacts as app.name')
         string(name: 'NEW_VERSION', defaultValue: '2.5.0', description: 'will be added as metadata on built artifacts as app.name')
         string(name: 'NEW_MSG', defaultValue: 'Welcome to Swampup 2021', description: '')
 
-        string(name: 'JPD_URL', defaultValue: 'yann-sbx.dev.gcp.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
+        string(name: 'JPD_URL', defaultValue: 'yann-demo.dev.gcp.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
+        string(name: 'JF_PROJECT', defaultValue: 'urs', description: 'JFrog Project key')
 
         string(name: 'MVN_REPO', defaultValue: 'urs-mvn', description: '')
-        string(name: 'MVN_PROMOTE', defaultValue: 'urs-mvn-prod-local', description: '')
+        string(name: 'MVN_PROMOTE', defaultValue: 'urs-mvn-release-local', description: '')
 
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
@@ -139,9 +140,11 @@ pipeline {
          
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER,
-    			    maxBuilds: 1,
+    			            maxBuilds: 1,
                             // doNotDiscardBuilds: ['4'],
             			    // deleteBuildArtifacts: true
+                            project: params.JF_PROJECT
+
                         )
 
                         // audit dependencies
@@ -166,13 +169,16 @@ pipeline {
                             deployerId: "MAVEN_DEPLOYER",
                             resolverId: "MAVEN_RESOLVER",
                             buildName: env.MY_BUILD_NAME,
-                            buildNumber: env.BUILD_NUMBER
+                            buildNumber: env.BUILD_NUMBER,
+                            project: params.JF_PROJECT
+
                         )
                       
                         rtPublishBuildInfo (
                             serverId: env.ART_ID,
                             buildName: env.MY_BUILD_NAME,
-                            buildNumber: env.BUILD_NUMBER
+                            buildNumber: env.BUILD_NUMBER,
+                            project: params.JF_PROJECT
                         )
 
                         sh """
@@ -193,37 +199,6 @@ pipeline {
             } // end step
         }   // end stage
         
-        // stage ('Xray scan') {
-        //     when {
-        //         expression {
-        //             params.MVN_BUILD
-        //         }
-        //     }
-        //     steps {
-        //         xrayScan (
-        //             serverId: env.ART_ID,
-        //             buildName: env.MY_BUILD_NAME,
-        //             buildNumber: env.BUILD_NUMBER,
-        //             failBuild: params.FAIL_BUILD 
-        //         )   
-
-        //         sh """
-        //             # workaround to see the scan result in the UI
-        //             if [ ${params.INDEX_BUILD} == "true" ]; then
-        //                 curl \
-        //                     -XPOST \
-        //                     -u "${ADM_USER}:${ADM_PASS}" \
-        //                     -H "Content-Type: application/json" \
-        //                     -d '{"buildName": "'${env.MY_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
-        //                 https://${params.JPD_URL}/xray/api/v1/scanBuild
-        //             else
-        //                 echo "No indexing"
-        //             fi
-        //         """
-        //     }
-        // }
-        
-
         stage ('Build promotion') {
             when {
                 expression {
@@ -265,7 +240,8 @@ pipeline {
                         captureEnv: true,
                         excludeEnvPatterns: ['*MY_BUILD_NAME*', 'DOCKER_BUILD_NAME'],
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
                     
                     rtDownload (
@@ -283,7 +259,8 @@ pipeline {
                         failNoOp: true,
                         module: 'webapp',
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
                     
                     sh """#!/bin/sh
@@ -317,61 +294,21 @@ pipeline {
                         targetRepo: params.DOCKER_REPO,
                         properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
  
                     rtPublishBuildInfo (
                         serverId: env.ART_ID,
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
 
-                    sh """
-                        if [ ${params.INDEX_BUILD} == "true" ]; then
-                            curl \
-                                -XPOST \
-                                -u "${ADM_USER}:${ADM_PASS}" \
-                                -H "Content-Type: application/json" \
-                                -d '{"names":["'${env.DOCKER_BUILD_NAME}'"]}' \
-                            https://${params.JPD_URL}/xray/api/v1/binMgr/builds
-                        else
-                            echo "No indexing"
-                        fi 
-                    """
                 }
             } // end steps
         } // end stage
 
-        // stage ('Xray scan for Docker Build') {
-        //     when {
-        //         expression {
-        //             params.DOCKER_BUILD
-        //         }
-        //     }
-        //     steps {
-        //         xrayScan (
-        //             serverId: env.ART_ID,
-        //             buildName: env.DOCKER_BUILD_NAME,
-        //             buildNumber: env.BUILD_NUMBER,
-        //             failBuild: params.FAIL_BUILD 
-        //         ) 
-
-        //         sh """
-        //             # workaround to see the scan result in the UI
-        //             if [ ${params.INDEX_BUILD} == "true" ]; then
-        //                 curl \
-        //                     -XPOST \
-        //                     -u "${ADM_USER}:${ADM_PASS}" \
-        //                     -H "Content-Type: application/json" \
-        //                     -d '{"buildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
-        //                 https://${params.JPD_URL}/xray/api/v1/scanBuild
-        //             else
-        //                 echo "No indexing"
-        //             fi 
-        //         """     
-        //     }
-        // }
-        
 
         stage ('Build promotion for Docker Build') {
             when {
@@ -385,7 +322,7 @@ pipeline {
                     serverId: env.ART_ID,
                     buildName: env.DOCKER_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
-
+                    project: params.JF_PROJECT,
                     targetRepo: params.DOCKER_PROMOTE,
                     comment: 'Xray scan passed',
                     status: 'VULN_SCAN_OK',
