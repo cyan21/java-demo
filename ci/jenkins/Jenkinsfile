@@ -43,6 +43,7 @@ pipeline {
         DOCKER_REGISTRY_URL=sh(returnStdout: true, script: """ if [ \"${params.DOCKER_SUB_DOMAIN}\" = \"true\" ]; then echo \"${params.DOCKER_REPO}.${params.JPD_URL}\"; else echo \"${params.JPD_URL}/${params.DOCKER_REPO}\"; fi""").trim()
         
         //JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
+        JAVA_HOME  = '/usr/local/openjdk-11'
         MAVEN_HOME = '/usr/share/maven'
     }
 
@@ -180,20 +181,6 @@ pipeline {
                             buildNumber: env.BUILD_NUMBER,
                             project: params.JF_PROJECT
                         )
-
-                        sh """
-                            echo ${env.MY_BUILD_NAME}
-                            if [ ${params.INDEX_BUILD} == "true" ]; then
-                                curl \
-                                    -XPOST \
-                                    -u "${ADM_USER}:${ADM_PASS}" \
-                                    -H "Content-Type: application/json" \
-                                    -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
-                                https://${params.JPD_URL}/xray/api/v1/binMgr/builds
-                            else
-                                echo "No indexing"
-                            fi 
-                        """
                     }
                 } // end container
             } // end step
