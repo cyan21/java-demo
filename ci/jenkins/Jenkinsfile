@@ -43,7 +43,7 @@ pipeline {
         DOCKER_REGISTRY_URL=sh(returnStdout: true, script: """ if [ \"${params.DOCKER_SUB_DOMAIN}\" = \"true\" ]; then echo \"${params.DOCKER_REPO}.${params.JPD_URL}\"; else echo \"${params.JPD_URL}/${params.DOCKER_REPO}\"; fi""").trim()
         
         //JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
-        JAVA_HOME  = '/usr/lib/jvm/java-1.11-openjdk/'
+        // JAVA_HOME  = '/usr/lib/jvm/java-1.11-openjdk/'
         MAVEN_HOME = '/usr/share/maven'
     }
 
@@ -98,6 +98,8 @@ pipeline {
                     sh """#!/bin/sh
                         apk add git curl openjdk11 jq
                         git clone ${params.MY_GIT_URL} -b ${params.MY_GIT_BRANCH}
+                        env 
+                        ls -l /usr/lib/jvm/
                     """
 
                     dir ("src") {
