@@ -61,13 +61,7 @@ jobs:
       buildName: $(BUILD_INFO_WEBAPP)
       buildNumber: '$(Build.BuildNumber)'
     displayName: 'Publish BOM'
-#   - task: ArtifactoryXrayScan@1
-#     inputs:
-#       artifactoryService: 'rt_yann_saas'
-#       buildName: $(BUILD_INFO_WEBAPP)
-#       buildNumber: '$(Build.BuildNumber)'
-#       allowFailBuild: false
-#     displayName: 'Scan Build Info'
+
 #   - task: ArtifactoryProperties@1
 #     inputs:
 #       command: 'set'
@@ -99,19 +93,21 @@ jobs:
 #       dryRun: false
 #     displayName: 'Promote Build Info'
 
-# - job: java_docker
-#   dependsOn:
-#   - java_webapp
-#   variables:
-#     - name: AppVersion
-#       value: $[ dependencies.java_webapp.outputs['getVersion.appversion'] ]
-#   steps:
-#   - task: Bash@3
-#     inputs:
-#       targetType: 'inline'
-#       script: |
-#         echo 'Hello inline version'
-#         echo $(AppVersion) 
+- job: java_docker
+  dependsOn:
+  - java_webapp
+
+  variables:
+  - name: AppVersion
+    value: $[ dependencies.java_webapp.outputs['getVersion.appversion'] ]
+
+  steps:
+   - task: Bash@3
+     inputs:
+       targetType: 'inline'
+       script: |
+         echo 'Hello inline version'
+         echo $(AppVersion) 
 #   - task: DockerInstaller@0
 #     inputs:
 #       dockerVersion: '17.09.0-ce'
