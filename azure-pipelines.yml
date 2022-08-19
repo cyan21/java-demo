@@ -54,12 +54,11 @@ jobs:
       includeEnvVars: true
     displayName: 'Build Maven project'
 
-  - task: ArtifactoryPublishBuildInfo@1
+  - task: JFrogPublishBuildInfo@1
     inputs:
-      artifactoryService: 'rt_yann_saas'
+      artifactoryConnection: 'rt_yann_saas'
       buildName: $(BUILD_INFO_WEBAPP)
       buildNumber: '$(Build.BuildNumber)'
-    displayName: 'Publish Build Info'
 
 #   - task: ArtifactoryXrayScan@1
 #     inputs:
