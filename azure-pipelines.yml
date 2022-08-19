@@ -37,7 +37,8 @@ jobs:
       watchesSource: 'watches'
       watches: 'team1'
       allowFailBuild: true
-  - task: ArtifactoryMaven@2
+
+  - task: JFrogMaven@1
     inputs:
       mavenPomFile: 'src/pom.xml'
       goals: 'clean package'
@@ -48,7 +49,7 @@ jobs:
       targetDeployReleaseRepo: $(MVN_REPO)
       targetDeploySnapshotRepo: $(MVN_REPO)
       collectBuildInfo: true
-      buildName: '$(BUILD_INFO_WEBAPP)'
+      buildName: $(BUILD_INFO_WEBAPP)
       buildNumber: '$(Build.BuildNumber)'
       includeEnvVars: true
     displayName: 'Build Maven project'
