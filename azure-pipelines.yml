@@ -36,7 +36,7 @@ jobs:
   - task: JFrogMaven@1
     inputs:
       mavenPomFile: 'src/pom.xml'
-      goals: 'clean package'
+      goals: 'clean install'
       artifactoryResolverService: 'rt_yann_saas'
       targetResolveReleaseRepo: $(MVN_REPO)
       targetResolveSnapshotRepo: $(MVN_REPO)
