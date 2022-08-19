@@ -35,7 +35,7 @@ jobs:
       xrayConnection: 'xr_yann_saas'
       workingDirectory: 'src/'
       watchesSource: 'watches'
-      watches: 'team1'
+      watches: 'team'
       allowFailBuild: true
 
   - task: JFrogMaven@1
