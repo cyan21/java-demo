@@ -172,11 +172,21 @@ jobs:
       command: 'jf docker images'
      displayName: 'List docker images'
 
-   - task: JfrogCliV2@1
+# REQUIRES DOCKER LOGIN BEFORE
+#   - task: JfrogCliV2@1
+#     inputs:
+#      jfrogPlatformConnection: 'rt_yann_saas_platform'
+#      command: 'jf docker build --build-arg REGISTRY=$(DOCKER_REG) -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)  src/'
+#     displayName: 'Build docker image'
+
+   - task: Docker@2
      inputs:
-      jfrogPlatformConnection: 'rt_yann_saas_platform'
-      command: 'jf docker build --build-arg REGISTRY=$(DOCKER_REG) -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)  src/'
-     displayName: 'Build docker image'
+       containerRegistry: 'yann_saas_docker'
+       repository: $(DOCKER_REPO)
+       command: 'build'
+       Dockerfile: 'src/Dockerfile'
+       arguments: '--build-arg REGISTRY=$(DOCKER_REG) -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
+     displayName: 'Build Docker image'
 
    - task: JFrogDocker@1
      inputs:
@@ -190,12 +200,24 @@ jobs:
         skipLogin: false
      displayName: 'Scan docker image'
 
-   - task: JfrogCliV2@1
+#   - task: JfrogCliV2@1
+#     inputs:
+#      jfrogPlatformConnection: 'rt_yann_saas_platform'
+#      command: 'jf docker push $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
+#     displayName: 'Push docker image'
+
+   - task: JFrogDocker@1
      inputs:
-      jfrogPlatformConnection: 'rt_yann_saas_platform'
-      command: 'jf docker push $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
+       command: 'Push'
+       artifactoryConnection: 'rt_yann_saas'
+       imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
+       collectBuildInfo: true
+       buildName: '$(JFROG_CLI_BUILD_NAME)'
+       buildNumber: '$(JFROG_CLI_BUILD_NUMBER)'
+       threads: '3'
+       skipLogin: false
      displayName: 'Push docker image'
-   
+
    - task: JFrogPublishBuildInfo@1
      inputs:
       artifactoryConnection: 'rt_yann_saas'
@@ -203,14 +225,7 @@ jobs:
       buildNumber: $(JFROG_CLI_BUILD_NAME)
      displayName: 'Publish BOM'
 
-#   - task: Docker@2
-#     inputs:
-#       containerRegistry: 'yann_swampup_docker'
-#       repository: $(DOCKER_REPO)
-#       command: 'build'
-#       Dockerfile: 'src/Dockerfile'
-#       arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
-#     displayName: 'Build Docker image'
+
 
 #   - task: ArtifactoryDocker@1
 #     inputs:
