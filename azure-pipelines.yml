@@ -140,32 +140,6 @@ jobs:
        dockerVersion: '17.09.0-ce'
      displayName: 'Install Docker'
 
-#   - task: ArtifactoryGenericDownload@3
-#     inputs:
-#       connection: 'yann_swampup'
-#       specSource: 'taskConfiguration'
-#       fileSpec: |
-#         {
-#           "files": [
-#             {
-#               "pattern" : "$(MVN_REPO)/",
-#               "props"   : "app.name=$(APP_NAME);app.version=$(AppVersion)",
-#               "target"  : "src/multi-module-application.jar",
-#               "flat"    : "true"
-#             }
-#           ]
-#         }
-#       collectBuildInfo: true
-#       buildName: $(BUILD_INFO_DOCKER)
-#       buildNumber: '$(Build.BuildNumber)'
-#       failNoOp: true
-#     displayName: 'Download webapp'
-
-#  - script: |
-#      docker images
-#       ls -l src
-#     displayName: 'Check up '
-
    - task: JfrogCliV2@1
      inputs:
       jfrogPlatformConnection: 'rt_yann_saas_platform'
@@ -200,12 +174,6 @@ jobs:
         skipLogin: false
      displayName: 'Scan docker image'
 
-#   - task: JfrogCliV2@1
-#     inputs:
-#      jfrogPlatformConnection: 'rt_yann_saas_platform'
-#      command: 'jf docker push $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
-#     displayName: 'Push docker image'
-
    - task: JFrogDocker@1
      inputs:
        command: 'Push'
@@ -222,48 +190,18 @@ jobs:
      inputs:
       artifactoryConnection: 'rt_yann_saas'
       buildName: $(JFROG_CLI_BUILD_NAME)
-      buildNumber: $(JFROG_CLI_BUILD_NAME)
+      buildNumber: $(JFROG_CLI_BUILD_NUMBER)
      displayName: 'Publish BOM'
 
-
-
-#   - task: ArtifactoryDocker@1
-#     inputs:
-#       command: 'push'
-#       artifactoryService: 'yann_swampup'
-#       targetRepo: $(DOCKER_REPO)
-#       imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
-#       collectBuildInfo: true
-#       buildName: $(BUILD_INFO_DOCKER)
-#       buildNumber: '$(Build.BuildNumber)'
-#       includeEnvVars: true
-#     displayName: 'Push Docker image'
-
-#   - task: ArtifactoryPublishBuildInfo@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       buildName: $(BUILD_INFO_DOCKER)
-#       buildNumber: '$(Build.BuildNumber)'
-#     displayName: 'Publish Docker Build Info'
-
-#   - task: ArtifactoryXrayScan@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       buildName: $(BUILD_INFO_DOCKER)
-#       buildNumber: '$(Build.BuildNumber)'
-#       allowFailBuild: false
-#     displayName: 'Scan Docker Build Info'
-
-#   - task: ArtifactoryBuildPromotion@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       buildName: $(BUILD_INFO_DOCKER)
-#       buildNumber: '$(Build.BuildNumber)'
-#       targetRepo: 'urs-docker-release-local'
-#       status: 'XRAY_SCAN_OK'
-#       comment: 'passed Xray Scan'
-#       sourceRepo: 'urs-docker-dev-local'
-#       includeDependencies: false
-#       copy: false
-#       dryRun: false
-#     displayName: 'Promote Docker Build Info'  
+   - task: JFrogBuildPromotion@1
+     inputs:
+      artifactoryConnection: 'rt_yann_saas'
+      buildName: '$(JFROG_CLI_BUILD_NAME)'
+      buildNumber: '$(JFROG_CLI_BUILD_NUMBER)'
+      targetRepo: 'urs-docker-rc-local'
+      status: 'Release_Candidate'
+      comment: 'passed the Quality Gates'
+      includeDependencies: false
+      copy: false
+      dryRun: false
+     displayName: 'Promote Docker Build Info'
