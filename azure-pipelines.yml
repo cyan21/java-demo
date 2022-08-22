@@ -175,7 +175,7 @@ jobs:
    - task: JfrogCliV2@1
      inputs:
       jfrogPlatformConnection: 'rt_yann_saas_platform'
-      command: 'jf docker build -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion) --build-arg REGISTRY=$(DOCKER_REG) src/'
+      command: 'jf docker build --build-arg REGISTRY=$(DOCKER_REG) -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)  src/'
      displayName: 'Build docker image'
 
    - task: JFrogDocker@1
