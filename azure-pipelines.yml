@@ -7,7 +7,7 @@ variables:
   DOCKER_REPO: urs-docker
   BUILD_INFO_WEBAPP: $(Build.DefinitionName)-ado
   #BUILD_INFO_DOCKER: docker-$(Build.DefinitionName)-ado
-
+  SKIP_JAVA: true
 trigger:
 - ado2
 
@@ -16,6 +16,7 @@ pool:
 
 jobs:
 - job: java_webapp
+  condition: eq(variables.SKIP_JAVA, 'true'))
   steps:
   - task: CmdLine@2
     inputs:
@@ -95,8 +96,8 @@ jobs:
     displayName: 'Promote Build Info'
 
 - job: java_docker
-  dependsOn:
-  - java_webapp
+#  dependsOn:
+#  - java_webapp
 
   variables:
   - name: AppVersion
@@ -176,7 +177,7 @@ jobs:
    - task: JfrogCliV2@1
      inputs:
       jfrogPlatformConnection: 'rt_yann_saas_platform'
-      command: 'jf docker build -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion) -f src/Dockerfile'
+      command: 'jf docker build -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion) src/'
      displayName: 'Build docker image'
 
 
