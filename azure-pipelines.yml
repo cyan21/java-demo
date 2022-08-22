@@ -161,10 +161,10 @@ jobs:
 #       failNoOp: true
 #     displayName: 'Download webapp'
 
-   - script: |
-       docker images
-       ls -l src
-     displayName: 'Check up '
+#  - script: |
+#      docker images
+#       ls -l src
+#     displayName: 'Check up '
 
    - task: JfrogCliV2@1
      inputs:
@@ -175,7 +175,7 @@ jobs:
    - task: JfrogCliV2@1
      inputs:
       jfrogPlatformConnection: 'rt_yann_saas_platform'
-      command: 'jf docker build -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion) src/'
+      command: 'jf docker build -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion) --build-arg REGISTRY=$(DOCKER_REG) src/'
      displayName: 'Build docker image'
 
    - task: JFrogDocker@1
