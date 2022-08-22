@@ -16,7 +16,7 @@ pool:
 
 jobs:
 - job: java_webapp
-  condition: eq(variables.SKIP_JAVA, 'true'))
+  condition: eq(variables.SKIP_JAVA, 'true')
   steps:
   - task: CmdLine@2
     inputs:
