@@ -7,7 +7,6 @@ variables:
   DOCKER_REPO: urs-docker
   BUILD_INFO_WEBAPP: $(Build.DefinitionName)-ado
   #BUILD_INFO_DOCKER: docker-$(Build.DefinitionName)-ado
-  SKIP_JAVA: true
 trigger:
 - ado2
 
@@ -16,7 +15,6 @@ pool:
 
 jobs:
 - job: java_webapp
-  condition: eq(variables.SKIP_JAVA, 'true')
   steps:
   - task: CmdLine@2
     inputs:
@@ -96,8 +94,8 @@ jobs:
     displayName: 'Promote Build Info'
 
 - job: java_docker
-#  dependsOn:
-#  - java_webapp
+  dependsOn:
+  - java_webapp
 
   variables:
   - name: AppVersion
@@ -180,13 +178,6 @@ jobs:
       command: 'jf docker build -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion) src/'
      displayName: 'Build docker image'
 
-
-   - task: JfrogCliV2@1
-     inputs:
-      jfrogPlatformConnection: 'rt_yann_saas_platform'
-      command: 'jf docker push $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
-     displayName: 'Build docker image'
-   
    - task: JFrogDocker@1
      inputs:
         command: 'Scan'
@@ -197,6 +188,20 @@ jobs:
         allowFailBuild: true
         threads: '3'
         skipLogin: false
+     displayName: 'Scan docker image'
+
+   - task: JfrogCliV2@1
+     inputs:
+      jfrogPlatformConnection: 'rt_yann_saas_platform'
+      command: 'jf docker push $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
+     displayName: 'Push docker image'
+   
+   - task: JFrogPublishBuildInfo@1
+     inputs:
+      artifactoryConnection: 'rt_yann_saas'
+      buildName: $(JFROG_CLI_BUILD_NAME)
+      buildNumber: $(JFROG_CLI_BUILD_NAME)
+     displayName: 'Publish BOM'
 
 #   - task: Docker@2
 #     inputs:
