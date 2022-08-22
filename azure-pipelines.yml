@@ -62,6 +62,37 @@ jobs:
       buildNumber: '$(Build.BuildNumber)'
     displayName: 'Publish BOM'
 
+  - task: JFrogGenericArtifacts@1
+    inputs:
+      command: 'Set Properties'
+      connection: 'rt_yann_saas'
+      setProps: 'app.version=$(getVersion.appversion);app.name=$(APP_NAME)'
+      specSource: 'taskConfiguration'
+      fileSpec: |
+        {
+          "files": [
+            {
+              "pattern": "$(MVN_REPO)/",
+              "build": "$(BUILD_INFO_WEBAPP)/$(Build.BuildNumber)",
+        "exclusions" : ["*.pom","*library*"]
+            }
+          ]
+        }
+      failNoOp: true
+    displayName: 'Set properties'
+  
+  - task: JFrogBuildPromotion@1
+    inputs:
+      artifactoryConnection: 'rt_yann_saas'
+      buildName: '$(BUILD_INFO_WEBAPP)'
+      buildNumber: '$(Build.BuildNumber)'
+      targetRepo: 'urs-mvn-rc-local'
+      status: 'Release_Candidate'
+      comment: 'passed the Quality Gates'
+      includeDependencies: true
+      copy: false
+      dryRun: false
+    displayName: 'Promote Build Info'
 #   - task: ArtifactoryProperties@1
 #     inputs:
 #       command: 'set'
