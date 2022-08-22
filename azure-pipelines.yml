@@ -3,10 +3,10 @@ variables:
   APP_NAME: blue
   MVN_REPO: urs-mvn
   MVN_REPO_PROMOTION: urs-mvn-rc-local
-  DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
+  DOCKER_REG: yann.jfrog.io
   DOCKER_REPO: urs-docker
   BUILD_INFO_WEBAPP: $(Build.DefinitionName)-ado
-  BUILD_INFO_DOCKER: docker-$(Build.DefinitionName)-ado
+  #BUILD_INFO_DOCKER: docker-$(Build.DefinitionName)-ado
 
 trigger:
 - ado2
@@ -49,11 +49,11 @@ jobs:
       includeEnvVars: true
     displayName: 'Build Maven project'
 
-  - task: JfrogCliV2@1
-    inputs:
-      jfrogPlatformConnection: 'rt_yann_saas_platform'
-      command: 'jf scan src/application/target/multi-module-application-*.jar'
-    displayName: 'Scan generated application'
+#  - task: JfrogCliV2@1
+#    inputs:
+#      jfrogPlatformConnection: 'rt_yann_saas_platform'
+#      command: 'jf scan src/application/target/multi-module-application-*.jar'
+#    displayName: 'Scan generated application'
 
   - task: JFrogPublishBuildInfo@1
     inputs:
@@ -93,36 +93,6 @@ jobs:
       copy: false
       dryRun: false
     displayName: 'Promote Build Info'
-#   - task: ArtifactoryProperties@1
-#     inputs:
-#       command: 'set'
-#       artifactoryService: 'yann_swampup'
-#       setProps: "app.version=$(getVersion.appversion);app.name=$(APP_NAME)"
-#       specSource: 'taskConfiguration'
-#       fileSpec: |
-#         {
-#           "files": [
-#             {
-#               "pattern": "$(MVN_REPO)/",
-#               "build" : "$(BUILD_INFO_WEBAPP)/$(Build.BuildNumber)",
-#               "exclusions" : ["*.pom","*library*"]
-#             }
-#           ]
-#         }
-#     displayName: 'Set properties'
-
-#   - task: ArtifactoryBuildPromotion@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       buildName: $(BUILD_INFO_WEBAPP)
-#       buildNumber: '$(Build.BuildNumber)'
-#       targetRepo: $(MVN_REPO_PROMOTION)
-#       status: 'XRAY_SCAN_OK'
-#       comment: 'passed Xray Scan'
-#       includeDependencies: true
-#       copy: false
-#       dryRun: false
-#     displayName: 'Promote Build Info'
 
 - job: java_docker
   dependsOn:
@@ -131,7 +101,10 @@ jobs:
   variables:
   - name: AppVersion
     value: $[ dependencies.java_webapp.outputs['getVersion.appversion'] ]
-
+  - name: JFROG_CLI_BUILD_NAME
+    value: 'docker-$(Build.DefinitionName)-ado'
+  - name: JFROG_CLI_BUILD_NUMBER
+    value: $(Build.BuildNumber)   
   steps:
    - task: Bash@3
      inputs:
@@ -139,10 +112,35 @@ jobs:
        script: |
          echo 'Hello inline version'
          echo $(AppVersion) 
-#   - task: DockerInstaller@0
-#     inputs:
-#       dockerVersion: '17.09.0-ce'
-#     displayName: 'Install Docker'
+
+   - task: JFrogGenericArtifacts@1
+     inputs:
+      command: 'Download'
+      connection: 'rt_yann_saas'
+      specSource: 'taskConfiguration'
+      fileSpec: |
+        {
+          "files": [
+            {
+              "pattern" : "$(MVN_REPO)/",
+              "props"   : "app.name=$(APP_NAME);app.version=$(AppVersion)",
+              "target"  : "src/multi-module-application.jar",
+              "flat"    : "true"
+            }
+          ]
+        }
+      collectBuildInfo: true
+      buildName: '$(JFROG_CLI_BUILD_NAME)'
+      buildNumber: '$(JFROG_CLI_BUILD_NUMBER)'
+      includeEnvVars: true
+      failNoOp: true
+     displayName: 'Download webapp'
+
+   - task: DockerInstaller@0
+     inputs:
+       dockerVersion: '17.09.0-ce'
+     displayName: 'Install Docker'
+
 #   - task: ArtifactoryGenericDownload@3
 #     inputs:
 #       connection: 'yann_swampup'
@@ -164,10 +162,40 @@ jobs:
 #       failNoOp: true
 #     displayName: 'Download webapp'
 
-#   - script: |
-#       docker images
-#       ls -l src
-#     displayName: 'Check up '
+   - script: |
+       docker images
+       ls -l src
+     displayName: 'Check up '
+
+   - task: JfrogCliV2@1
+     inputs:
+      jfrogPlatformConnection: 'rt_yann_saas_platform'
+      command: 'jf docker images'
+     displayName: 'List docker images'
+
+   - task: JfrogCliV2@1
+     inputs:
+      jfrogPlatformConnection: 'rt_yann_saas_platform'
+      command: 'jf docker build -t $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion) -f src/Dockerfile'
+     displayName: 'Build docker image'
+
+
+   - task: JfrogCliV2@1
+     inputs:
+      jfrogPlatformConnection: 'rt_yann_saas_platform'
+      command: 'jf docker push $(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
+     displayName: 'Build docker image'
+   
+   - task: JFrogDocker@1
+     inputs:
+        command: 'Scan'
+        xrayConnection: 'xr_yann_saas'
+        imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-java-webapp:$(AppVersion)'
+        watchesSource: 'none'
+        licenses: true
+        allowFailBuild: true
+        threads: '3'
+        skipLogin: false
 
 #   - task: Docker@2
 #     inputs:
