@@ -18,6 +18,8 @@ jobs:
   create-fix-pull-requests:
     env:
       JF_ENV_1: ${{ secrets.JF_SECRET }}
+      JF_ID: yann-sbx
+      MVN_REPO: one-mvn
     runs-on: ubuntu-latest
     environment: frogbot
     steps:
@@ -36,6 +38,17 @@ jobs:
         uses: jfrog/setup-jfrog-cli@v2
         with:
           version: "2.27.1"
+
+      - name: Configure JFrog CLI with Maven client
+        run: | 
+          jf rt mvnc \
+                  --server-id-resolve=${{ env.JF_ID }} \
+                  --repo-resolve-releases=${{ env.MVN_REPO }}	\
+                  --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
+                  --server-id-deploy=${{ env.JF_ID }} \
+                  --repo-deploy-releases=${{ env.MVN_REPO }} \
+                  --repo-deploy-snapshots=${{ env.MVN_REPO }}
+
         
       - uses: jfrog/frogbot@v2
         env:
