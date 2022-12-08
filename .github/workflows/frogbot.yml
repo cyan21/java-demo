@@ -16,6 +16,8 @@ permissions:
 jobs:
 #  scan-pull-request:
   create-fix-pull-requests:
+    env:
+      JF_ENV_1: ${{ secrets.JF_SECRET }}
     runs-on: ubuntu-latest
     environment: frogbot
     steps:
@@ -34,8 +36,6 @@ jobs:
         uses: jfrog/setup-jfrog-cli@v2
         with:
           version: "2.27.1"
-	env:
-          JF_ENV_1: ${{ secrets.JF_SECRET }}
         
       - uses: jfrog/frogbot@v2
         env:
