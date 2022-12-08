@@ -30,6 +30,14 @@ jobs:
           java-version: "11"
           distribution: "temurin"
 
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v2
+        with:
+          version: ${{ env.JF_CLI_VERSION }}
+	env:
+          JF_CLI_VERSION: 2.27.1
+          JF_ENV_1: ${{ secrets.JF_SECRET }}
+        
       - uses: jfrog/frogbot@v2
         env:
           #JF_INSTALL_DEPS_CMD: "mvn install"
