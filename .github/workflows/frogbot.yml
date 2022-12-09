@@ -42,6 +42,7 @@ jobs:
       - name: Configure JFrog CLI with Maven client
         run: | 
           jf mvnc \
+                  --global \
                   --server-id-resolve=${{ env.JF_ID }} \
                   --repo-resolve-releases=${{ env.MVN_REPO }}	\
                   --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
