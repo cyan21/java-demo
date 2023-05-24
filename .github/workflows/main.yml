@@ -11,10 +11,11 @@ on:
 
 env:
   JF_ENV_1: ${{ secrets.JF_SECRET }}
-  JF_ID: yann-sbx
+  JF_ID: psemea-gha
   JF_CLI_VERSION: 2.27.1
   APP_VERSION: 2.0.0
-  MVN_REPO: urs-mvn
+  MVN_REPO: yann-mvn
+  JFROG_CLI_BUILD_PROJECT: yann-demo
    
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -29,8 +30,8 @@ jobs:
       MVN_VERSION: 3.8.2
       # required by jf CLI
       # M2_HOME: /opt/hostedtoolcache/maven/3.8.2/x64 # NOT required in jf CLI v2.3.0
-      MVN_REPO: urs-mvn
-      PROMOTE_REPO: urs-mvn-release-local
+      #MVN_REPO: yann-mvn
+      PROMOTE_REPO: yann-mvn-release-local
     steps:
       - uses: actions/checkout@v2
 
@@ -93,11 +94,11 @@ jobs:
     needs: build_webapp
     runs-on: ubuntu-latest
     env:
-      DOCKER_REG: yann-sbx.dev.gcp.devopsacc.team
-      DOCKER_REPO: urs-docker
+      DOCKER_REG: psemea.jfrog.io
+      DOCKER_REPO: yann-docker
       DOCKER_USER: admin
-      SRC_REPO: urs-docker-dev-local
-      PROMOTE_REPO: urs-docker-release-local
+      SRC_REPO: yann-docker-dev-local
+      PROMOTE_REPO: yann-docker-release-local
     steps:
       - uses: actions/checkout@v2
 
