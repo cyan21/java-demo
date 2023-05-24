@@ -15,7 +15,7 @@ env:
   JF_CLI_VERSION: 2.27.1
   APP_VERSION: 2.0.0
   MVN_REPO: yann-mvn
-  JFROG_CLI_BUILD_PROJECT: yann-demo
+  JFROG_CLI_BUILD_PROJECT: yann
    
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
