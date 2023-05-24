@@ -131,8 +131,10 @@ jobs:
         with:
           context: src/
           tags: ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }}
-          build-args: REGISTRY=${{ env.DOCKER_REG }}
-
+          build-args: |
+            REGISTRY=${{ env.DOCKER_REG }}
+            DOCKER_REPO=${{ env.DOCKER_REPO }}
+            
       - name: Scan Docker image
         run: |
           jf docker scan ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }}
