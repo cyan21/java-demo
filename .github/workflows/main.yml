@@ -11,7 +11,7 @@ on:
 
 env:
   JF_ENV_1: ${{ secrets.JF_DEMO_SECRET }}
-  JF_ID: psemea-gha
+  JF_ID: yann-sbx
   JF_CLI_VERSION: 2.27.1
   APP_VERSION: 2.0.0
   MVN_REPO: yann-mvn
