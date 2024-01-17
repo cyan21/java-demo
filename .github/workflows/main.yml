@@ -12,7 +12,7 @@ on:
 env:
   JF_ENV_1: ${{ secrets.JF_DEMO_SECRET }}
   JF_ID: yann-sbx
-  JF_CLI_VERSION: 2.27.1
+  JF_CLI_VERSION: 2.48.0
   APP_VERSION: 2.0.0
   MVN_REPO: yann-mvn
   JFROG_CLI_BUILD_PROJECT: yann
