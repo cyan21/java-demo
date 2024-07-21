@@ -14,7 +14,7 @@ env:
 #  JF_ID: yann-sbx
 #  JF_CLI_VERSION: 2.27.1
   APP_VERSION: 2.0.0
-  MVN_REPO: urs-mvn
+  MVN_REPO: yann-maven-test
    
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -37,9 +37,9 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: ${{ secrets.JF_YANN_SBX }}
+          JF_URL: "https://yann-sbx.dev.gcp.jfps.team"
         with:
-          version: ${{ env.JF_CLI_VERSION }}
+#          version: ${{ env.JF_CLI_VERSION }}
           oidc-provider-name: yann-oidc
 #          oidc-audience: java-dev
           
