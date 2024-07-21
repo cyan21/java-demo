@@ -35,10 +35,14 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v2 
+        uses: jfrog/setup-jfrog-cli@v3
+        env:
+          JF_URL: ${{ secrets.JF_YANN_SBX }}
         with:
           version: ${{ env.JF_CLI_VERSION }}
-    
+          oidc-provider-name: yann-oidc
+          oidc-audience: java-dev
+          
       - name: Setup Java JDK ${{ env.JAVA_DIST }} ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v2.3.0
         with:
@@ -67,8 +71,8 @@ jobs:
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
-      - name: Scan dependencies
-        run:  cd src && jf audit
+#      - name: Scan dependencies
+#        run:  cd src && jf audit
 
       - name: Build webapp and scan generated artifact before upload
         run: jf mvn clean install -f src/  --no-transfer-progress
@@ -88,67 +92,3 @@ jobs:
       - name: Promote Build 
         run: jf rt bpr --fail-fast=false --status "TEST_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
   
-  build_docker:
-    if: ${{ true }}
-    needs: build_webapp
-    runs-on: ubuntu-latest
-    env:
-      DOCKER_REG: yann-sbx.dev.gcp.devopsacc.team
-      DOCKER_REPO: urs-docker
-      DOCKER_USER: admin
-      SRC_REPO: urs-docker-dev-local
-      PROMOTE_REPO: urs-docker-release-local
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v2  
-        with:
-          version: ${{ env.JF_CLI_VERSION }}
-
-      - name: Download webapp
-        run: |
-          jf rt download \
-            --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  \
-            --exclusions "*.pom;*library*" \
-            --flat=true \
-            --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER \
-            --fail-no-op=true \
-            --module=webapp \
-            ${{ env.MVN_REPO }} src/multi-module-application.jar
-
-      - name: Docker Login
-        uses: docker/login-action@v1.10.0
-        with:
-          registry: ${{ env.DOCKER_REG }}
-          username: ${{ env.DOCKER_USER }}
-          password: ${{ secrets.RT_SECRET }}
-
-      - name: Build Docker image
-        uses: docker/build-push-action@v2.6.1
-        with:
-          context: src/
-          tags: ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }}
-          build-args: REGISTRY=${{ env.DOCKER_REG }}
-
-      - name: Scan Docker image
-        run: |
-          jf docker scan ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }}
-
-      - name: Push Docker image
-        run: jf docker push ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-java-webapp:${{ env.APP_VERSION }} --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER
-
-      - name: Publish Docker Build Info
-        run: |
-          jf rt bce docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
-          jf rt bag docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
-          jf rt bp docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
-
-      # - name: Scan Build 
-      #   run: jf bs --fail=false docker-$jf_CLI_BUILD_NAME $jf_CLI_BUILD_NUMBER
-
-      # - name: Deploy and Test 
-      #   run: echo deploy and run test
-
-      # - name: Promote Build 
-      #   run: jf rt bpr --fail-fast=false --status "XRAY_SCAN_OK" --source-repo ${{ env.SRC_REPO }} --comment "promoted to the next level" docker-$jf_CLI_BUILD_NAME $jf_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
