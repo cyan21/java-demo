@@ -83,7 +83,7 @@ jobs:
         run: jf mvn clean install -f src/  #--no-transfer-progress
 
       - name: Scan dependencies
-        run:  jf audit --working-dirs=src
+        run:  jf audit --working-dirs=src --sca=true --without-contextual-analysis=true
         
       - name: Publish Build Info
         run: |
