@@ -40,9 +40,9 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: ${{ secrets.JF_YANN_SBX }}
-#        JF_URL: "https://yann-sbx.dev.gcp.jfps.team"
-#          JFROG_CLI_LOG_LEVEL: DEBUG
+ #         JF_URL: ${{ secrets.JF_YANN_SBX }}
+          JF_URL: "https://yann-sbx.dev.gcp.jfps.team"
+          JFROG_CLI_LOG_LEVEL: DEBUG
         with:
 #          version: ${{ env.JF_CLI_VERSION }}
           oidc-provider-name: yann-oidc
