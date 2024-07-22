@@ -68,7 +68,7 @@ jobs:
             
       - name: Configure JFrog CLI with Maven client
         run: | 
-          jf rt mvnc \
+          jf mvnc \
                   --server-id-resolve=${{ env.JF_ID }} \
                   --repo-resolve-releases=${{ env.MVN_REPO }}	\
                   --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
@@ -76,11 +76,14 @@ jobs:
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
-      - name: Scan dependencies
-        run:  cd src && jf audit
+#      - name: Scan dependencies
+#        run:  cd src && jf audit 
 
       - name: Build webapp and scan generated artifact before upload
         run: jf mvn clean install -f src/  --no-transfer-progress
+
+      - name: Scan dependencies
+        run:  jf audit --working-dirs=src
         
       - name: Publish Build Info
         run: |
