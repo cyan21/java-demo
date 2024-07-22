@@ -80,7 +80,7 @@ jobs:
 #        run:  cd src && jf audit 
 
       - name: Scan dependencies
-        run:  jf audit --working-dirs=src --sca=true --url="https://yann-sbx.dev.gcp.jfps.team/xray" --access-token=${{ secrets.JF_ACCESS_TOKEN }}
+        run:  jf audit --working-dirs=src --url="https://yann-sbx.dev.gcp.jfps.team/xray" --access-token=${{ secrets.JF_ACCESS_TOKEN }}
         
       - name: Build webapp and scan generated artifact before upload
         run: jf mvn clean install -f src/  --no-transfer-progress
