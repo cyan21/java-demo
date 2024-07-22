@@ -19,6 +19,9 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build_webapp:
+    permissions:
+      id-token: write
+      
     if: ${{ true }}
     runs-on: ubuntu-latest
     env:
