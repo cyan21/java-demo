@@ -40,8 +40,9 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-          JF_URL: "https://yann-sbx.dev.gcp.jfps.team"
-          JFROG_CLI_LOG_LEVEL: DEBUG
+          JF_URL: ${{ secrets.JF_YANN_SBX }}
+#        JF_URL: "https://yann-sbx.dev.gcp.jfps.team"
+#          JFROG_CLI_LOG_LEVEL: DEBUG
         with:
 #          version: ${{ env.JF_CLI_VERSION }}
           oidc-provider-name: yann-oidc
@@ -75,8 +76,8 @@ jobs:
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
-#      - name: Scan dependencies
-#        run:  cd src && jf audit
+      - name: Scan dependencies
+        run:  cd src && jf audit
 
       - name: Build webapp and scan generated artifact before upload
         run: jf mvn clean install -f src/  --no-transfer-progress
@@ -93,6 +94,6 @@ jobs:
       - name: Run test 
         run: echo running tests ...
 
-      - name: Promote Build 
-        run: jf rt bpr --fail-fast=false --status "TEST_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
+#      - name: Promote Build 
+#        run: jf rt bpr --fail-fast=false --status "TEST_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
   
