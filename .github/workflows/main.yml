@@ -79,11 +79,13 @@ jobs:
 #      - name: Scan dependencies
 #        run:  cd src && jf audit 
 
-      - name: Build webapp and scan generated artifact before upload
-        run: jf mvn clean install -f src/  #--no-transfer-progress
-
       - name: Scan dependencies
-        run:  jf audit --working-dirs=src --sca=true --without-contextual-analysis=true
+        run:  jf audit --working-dirs=src --sca=true --without-contextual-analysis=true --access-token=${{ secrets.JF_ACCESS_TOKEN }}
+        
+      - name: Build webapp and scan generated artifact before upload
+        run: jf mvn clean install -f src/  --no-transfer-progress
+
+
         
       - name: Publish Build Info
         run: |
