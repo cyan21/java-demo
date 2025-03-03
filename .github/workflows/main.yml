@@ -43,8 +43,10 @@ jobs:
         env:
            JF_URL: ${{ secrets.JF_URL }}
         with:
-          oidc-provider-name: ${{ secrets.JF_OIDC_PROVIDER }} 
-          oidc-audience: ${{ secrets.JF_AUDIENCE }} 
+#          oidc-provider-name: ${{ secrets.JF_OIDC_PROVIDER }} 
+#          oidc-audience: ${{ secrets.JF_AUDIENCE }} 
+          oidc-provider-name: yann-github
+          oidc-audience: yann
           
       - name: Setup Maven ${{ env.MVN_VERSION }}
         uses: s4u/setup-maven-action@v1.18.0
