@@ -40,13 +40,10 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-#           JF_URL: ${{ secrets.JF_URL }}
-           JF_URL: https://yann-sbx.dev.gcp.jfps.team
+           JF_URL: ${{ secrets.JF_URL }}
         with:
-#          oidc-provider-name: ${{ secrets.JF_OIDC_PROVIDER }} 
-#          oidc-audience: ${{ secrets.JF_AUDIENCE }} 
-          oidc-provider-name: yann-github
-          oidc-audience: yann
+          oidc-provider-name: ${{ secrets.JF_OIDC_PROVIDER }} 
+          oidc-audience: ${{ secrets.JF_AUDIENCE }} 
           
       - name: Setup Maven ${{ env.MVN_VERSION }}
         uses: s4u/setup-maven-action@v1.18.0
@@ -64,10 +61,8 @@ jobs:
       - name: Configure JFrog CLI with Maven client
         run: | 
           jf mvnc \
-                  --server-id-resolve=jfrog-platform \
                   --repo-resolve-releases=${{ env.MVN_REPO }}	\
                   --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
-                  --server-id-deploy=jfrog-platform \
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
