@@ -62,15 +62,16 @@ jobs:
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
+      - name: Curation 
+        run:  jf curation-audit  --working-dirs=src
+
       - name: Scan dependencies
         run:  jf audit --working-dirs=src 
         
       - name: Build webapp and scan generated artifact before upload
         run: jf mvn clean install -f src/  --no-transfer-progress
 
-
-        
-      - name: Publish Build Info
+      - name: Collect Build information
         run: |
           # Collect environment variables for the build
           jf rt bce 
