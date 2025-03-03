@@ -11,9 +11,8 @@ on:
 
 env:
 #  JF_ENV_1: ${{ secrets.JF_SECRET }}
-#  JF_ID: yann-sbx
 #  JF_CLI_VERSION: 2.27.1
-  APP_VERSION: 2.0.0
+#  APP_VERSION: 2.0.0
   MVN_REPO: yann-maven-test
    
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -26,39 +25,26 @@ jobs:
     runs-on: ubuntu-latest
     env:
 #      JF_ENV_1: ${{ secrets.JF_SECRET }}
-      JFROG_BUILD_STATUS: PASS
       JAVA_VERSION: 16.0.2+7
-      JAVA_DIST: zulu
-      MVN_VERSION: 3.8.2
-      # required by jf CLI
-      # M2_HOME: /opt/hostedtoolcache/maven/3.8.2/x64 # NOT required in jf CLI v2.3.0
-      MVN_REPO: yann-maven-test
-      PROMOTE_REPO: urs-mvn-release-local
+      MVN_VERSION: 3.9.9
+      MVN_REPO: yann-libs-release
     steps:
       - uses: actions/checkout@v2
 
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
- #         JF_URL: ${{ secrets.JF_YANN_SBX }}
-          JF_URL: "https://yann-sbx.dev.gcp.jfps.team"
-          JFROG_CLI_LOG_LEVEL: DEBUG
+           JF_URL: ${{ secrets.JF_URL }}
         with:
-#          version: ${{ env.JF_CLI_VERSION }}
-          oidc-provider-name: yann-oidc
-#          oidc-audience: java-dev
+          oidc-provider-name: ${{ secrets.JF_OIDC_PROVIDER }} 
+          oidc-audience: ${{ secrets.JF_AUDIENCE }} 
           
-      - name: Setup Java JDK ${{ env.JAVA_DIST }} ${{ env.JAVA_VERSION }}
-        uses: actions/setup-java@v2.3.0
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: ${{ env.JAVA_DIST }}
-        
       - name: Setup Maven ${{ env.MVN_VERSION }}
-        uses: stCarolas/setup-maven@v4.1
+        uses: s4u/setup-maven-action@v1.18.0
         with:
-          maven-version: ${{ env.MVN_VERSION }}
-    
+          java-version: 23 
+          maven-version: ${{ env.MVN_VERSION }} 
+
       - name: Ping Artifactory
         run: |
             jf --version
@@ -69,19 +55,18 @@ jobs:
       - name: Configure JFrog CLI with Maven client
         run: | 
           jf mvnc \
-                  --server-id-resolve=${{ env.JF_ID }} \
+                  --server-id-resolve=jfrog-platform \
                   --repo-resolve-releases=${{ env.MVN_REPO }}	\
                   --repo-resolve-snapshots=${{ env.MVN_REPO }}	\
-                  --server-id-deploy=${{ env.JF_ID }} \
+                  --server-id-deploy=jfrog-platform \
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
-#      - name: Scan dependencies
-#        run:  cd src && jf audit 
+      - name: Scan dependencies
+        run:  cd src && jf audit 
 
       - name: Scan dependencies
         run:  jf audit --working-dirs=src 
-        #--url="https://yann-sbx.dev.gcp.jfps.team/xray" --access-token=${{ secrets.JF_ACCESS_TOKEN }}
         
       - name: Build webapp and scan generated artifact before upload
         run: jf mvn clean install -f src/  --no-transfer-progress
@@ -94,12 +79,7 @@ jobs:
           jf rt bce 
           # Collect VCS details from git and add them to the build
           jf rt bag
-          # Publish build info
-          jf rt bp
           
       - name: Run test 
         run: echo running tests ...
 
-#      - name: Promote Build 
-#        run: jf rt bpr --fail-fast=false --status "TEST_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
-  
