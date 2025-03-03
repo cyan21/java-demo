@@ -25,14 +25,13 @@ env:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build_webapp:
-    permissions:
-      id-token: write
+#    permissions:
+#      id-token: write
       
     if: ${{ true }}
     runs-on: ubuntu-latest
     env:
-#      JF_ENV_1: ${{ secrets.JF_SECRET }}
-      JAVA_VERSION: 16.0.2+7
+#      JAVA_VERSION: 16.0.2+7
       MVN_VERSION: 3.9.9
       MVN_REPO: yann-libs-release
     steps:
@@ -41,7 +40,8 @@ jobs:
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v4
         env:
-           JF_URL: ${{ secrets.JF_URL }}
+#           JF_URL: ${{ secrets.JF_URL }}
+           JF_URL: https://yann-sbx.dev.gcp.jfps.team
         with:
 #          oidc-provider-name: ${{ secrets.JF_OIDC_PROVIDER }} 
 #          oidc-audience: ${{ secrets.JF_AUDIENCE }} 
