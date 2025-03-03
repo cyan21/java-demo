@@ -4,10 +4,17 @@ name: java-webapp-gha
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ "main"]
+    branches: [ "oidc-integration"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+
+permissions:
+  # This is required for requesting the OIDC token
+  id-token: write
+  # This is required for actions/checkout
+  contents: read
+
 
 env:
 #  JF_ENV_1: ${{ secrets.JF_SECRET }}
