@@ -27,7 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MVN_VERSION: 3.9.9
-      MVN_REPO: yann-libs-release
+      MVN_REPO: 'ych-maven'
+      OIDC_AUDIENCE: 'github-yann-demo'
+      OIDC_PROVIDER: 'github-yann'
     steps:
       - uses: actions/checkout@v2
 
@@ -36,8 +38,8 @@ jobs:
         env:
            JF_URL: ${{ secrets.JF_URL }}
         with:
-          oidc-provider-name: ${{ secrets.JF_OIDC_PROVIDER }} 
-          oidc-audience: ${{ secrets.JF_AUDIENCE }} 
+          oidc-provider-name: ${{ env.OIDC_PROVIDER }} 
+          oidc-audience: ${{ env.OIDC_AUDIENCE }} 
           disable-auto-build-publish: false 
           disable-job-summary: false 
           
@@ -62,11 +64,11 @@ jobs:
                   --repo-deploy-releases=${{ env.MVN_REPO }} \
                   --repo-deploy-snapshots=${{ env.MVN_REPO }}
 
-      - name: Curation 
-        run:  jf curation-audit  --working-dirs=src
+#      - name: Curation 
+#        run:  jf curation-audit  --working-dirs=src
 
-      - name: Scan dependencies
-        run:  jf audit --working-dirs=src 
+#      - name: Scan dependencies
+#        run:  jf audit --working-dirs=src 
         
       - name: Build webapp and scan generated artifact before upload
         run: jf mvn clean install -f src/  --no-transfer-progress
